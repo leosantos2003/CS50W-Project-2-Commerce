@@ -4,12 +4,24 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from django.db.models import Max
+
 from django.contrib.auth.decorators import login_required
 from .models import User, Listing, Category
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    # Filtra o banco de dados para pegar apenas os anúncios onde is_active = True
+    # Annotate serve para criar um campo temporário 'max_bid para cada anúncio
+    # Este campo conterá o valor máximo (Max) do campo 'amount' dos lances ('bids')   
+    active_listings = Listing.objects.filter(is_active=True).annotate(
+        max_bid=Max('bids__amount')
+    )
+
+    # Envia a lista de anúncios para o template através do contexto
+    return render(request, "auctions/index.html", {
+        "listings": active_listings
+    })
 
 
 def login_view(request):

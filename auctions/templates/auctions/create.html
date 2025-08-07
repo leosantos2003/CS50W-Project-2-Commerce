@@ -1,4 +1,4 @@
-{% extends "auctions/layout.html %}
+{% extends "auctions/layout.html" %}
 
 {% block title %}
     Create New Listing
@@ -7,7 +7,7 @@
 {% block body %}
     <h2>Create New Listing</h2>
 
-    {% inf message %}
+    {% if message %}
         <div class="alert alert-danger">{{ message }}</div>
     {% endif %}
 

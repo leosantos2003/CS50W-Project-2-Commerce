@@ -3,5 +3,38 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    <div class="row">
+
+        {% for listing in listings %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+
+                    {% if listing.image_url %}
+                        <img src="{{ listing.image_url }}" class="card-img-top" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="d-flex align-items-center bg-light" style="height: 200px;">
+                            <span class="text-muted">No image</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-body d-flex flex-column">{{ listing.title }}</h5>
+                        <p class="card-text flex-grow-1">{{ listing.description }}</p>
+
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Price: ${{ listing.max_bid|default:listing.starting_bid }}
+                        </h6>
+
+                        <a href="#" class="btn btn-primary mt-auto">View Details</a>
+                    </div>
+
+                </div>
+            </div>
+        {% empty %}
+            <div class="col">
+                <p>No active listings at the moment.</p>
+            </div>
+        {% endfor %}
+    </div>
+
 {% endblock %}
