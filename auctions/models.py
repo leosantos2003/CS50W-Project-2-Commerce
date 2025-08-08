@@ -16,9 +16,17 @@ class Listing(models.Model):
     description = models.TextField()
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     image_url = models.URLField(blank=True, null=True)
-    category = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
+    
+    # --- CORREÇÃO 1: Apontar para o modelo 'Category' ---
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="listings")
+    
+    # --- CORREÇÃO 2: Adicionar o campo 'creator' que estava faltando ---
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings_created")
+    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    watchlist = models.ManyToManyField(User, blank=True, related_name="watched_listings")
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="won_listings")
 
     def __str__(self):
         return self.title

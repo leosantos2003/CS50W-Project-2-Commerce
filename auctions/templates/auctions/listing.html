@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+    {{ listing.title }}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-6">
+                {% if listing_page %}
+                    <img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="img-fluid">
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
+                        <span class="text-muted">No Image Provided</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <h2>{{ listing.title }}</h2>
+                <p><strong>Listed by:</strong> {{ listing.creator.username }}</p>
+                <p><strong>Category:</strong>{{ listing.category.name|default:"No Category" }}</p>
+                <hr>
+                <p>{{ listing.description }}</p>
+                <hr>
+                <h4 class="font-weight-bold">Price: ${{ current_price }}</h4>
+                <p class="text-muted">{{ listing.bids.count }} bid(s) so far.</p>
+            </div>
+
+        </div>
+        <hr>
+    </div>
+{% endblock %}

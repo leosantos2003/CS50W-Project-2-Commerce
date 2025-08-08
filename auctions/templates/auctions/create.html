@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block body %}
+    <div class="container col-lg-7 my-5">
     <h2>Create New Listing</h2>
 
     {% if message %}
@@ -22,7 +23,7 @@
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
         </div>
 
         <div class="form-group">
@@ -46,4 +47,5 @@
 
         <button type="submit" class="btn btn-primary">Create Listing</button>
     </form>
+    </div>
 {% endblock %}

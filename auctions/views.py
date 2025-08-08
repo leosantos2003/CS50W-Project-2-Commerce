@@ -9,6 +9,8 @@ from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 from .models import User, Listing, Category
 
+from django.shortcuts import get_object_or_404
+
 
 def index(request):
     # Filtra o banco de dados para pegar apenas os anúncios onde is_active = True
@@ -82,8 +84,7 @@ def create_listing(request):
         title = request.POST["title"]
         description = request.POST["description"]
         starting_bid = request.POST["starting_bid"]
-        image_url = request.POST["image_url"]
-        category_id = request.POST["category"]
+        image_url = request.POST.get("image_url") # .get() é bom para campos opcionais também
 
         # Validação básica
         if not title or not description or not starting_bid:
@@ -92,8 +93,12 @@ def create_listing(request):
                 "categories": Category.objects.all()
             })
         
+        # Usar .get() é mais seguro, pois retorna None se a chave não existir, em vez de quebrar.
+        category_id = request.POST.get("category")
+
         # Obter o objeto Category
-        category = Category.objects.get(pk=category_id)
+        # Só busca a categoria se um ID foi realmente enviado.
+        category = Category.objects.get(pk=category_id) if category_id else None
 
         # Criar o novo anúncio no banco de dados
         new_listing = Listing(
@@ -111,5 +116,18 @@ def create_listing(request):
     else:
         # Mostrar o formulário em branco
         return render(request, "auctions/create.html", {
-            "catoegories": Category.objects.all()
+            "categories": Category.objects.all()
         })
+    
+def listing_page(request, listing_id):
+    # Busca o anúncio pelo ID. Se não encontrar, retorna um erro 404.
+    listing = get_object_or_404(Listing, pk=listing_id)
+
+    # Lógica para determinar o preço atual (maior lance ou lance inicial)
+    highest_bid = listing.bids.order_by('-amount').first()
+    current_price = highest_bid.amount if highest_bid else listing.starting_bid
+
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+        "current_price": current_price
+    })
