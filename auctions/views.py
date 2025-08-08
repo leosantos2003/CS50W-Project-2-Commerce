@@ -205,3 +205,22 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html", {
         "listings": user_watchlist
     })
+
+def categories(request):
+    all_categories = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": all_categories
+    })
+
+def category_page(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+
+    # Filtra os anúncios que são da categorias E estão ativos
+    listings_in_category = Listing.objects.filter(category=category, is_active=True).annotate(
+        max_bid=Max('bids__amount')
+    )
+
+    return render(request, "auctions/category_page.html", {
+        "category": category,
+        "listings": listings_in_category
+    })
