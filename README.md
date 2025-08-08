@@ -7,9 +7,9 @@
 
 ## About
 
-Proposed as [Project 2][https://cs50.harvard.edu/web/projects/2/commerce/] by CS50W.
+Proposed as [Project 2](https://cs50.harvard.edu/web/projects/2/commerce/) by CS50W. A front/back-end built with Django and SQL, for an e-commerce auction site similar to eBay.
 
-addeawsefw
+The site allows users to register an account to post auction listings, place bids on listings, comment on those listings, and add listings to a "watchlist".
 
 ## Screenshots
 
@@ -25,7 +25,7 @@ addeawsefw
 
 ## Video Demo
 
-fewarkvjans
+fewarkvjansdewafdsadfweads
 
 ## License
 
