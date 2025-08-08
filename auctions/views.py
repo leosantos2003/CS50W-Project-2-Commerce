@@ -1,3 +1,4 @@
+from urllib import request
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -7,7 +8,7 @@ from django.urls import reverse
 from django.db.models import Max
 
 from django.contrib.auth.decorators import login_required
-from .models import User, Listing, Category
+from .models import User, Listing, Category, Bid
 
 from django.shortcuts import get_object_or_404
 
@@ -122,12 +123,66 @@ def create_listing(request):
 def listing_page(request, listing_id):
     # Busca o anúncio pelo ID. Se não encontrar, retorna um erro 404.
     listing = get_object_or_404(Listing, pk=listing_id)
+    is_on_watchlist = request.user.is_authenticated and request.user in listing.watchlist.all()
 
-    # Lógica para determinar o preço atual (maior lance ou lance inicial)
-    highest_bid = listing.bids.order_by('-amount').first()
-    current_price = highest_bid.amount if highest_bid else listing.starting_bid
+    # Lógica de processamento de lances (quando o formulário é enviado)
+    if request.method == "POST":
+        # Um usuário não logado não deve poder dar lances
+        if not request.user.is_authenticated:
+            return render(request, "auctions/login.html", {
+                "message": "You must be logged in to place a bid."
+            })
+        try:
+            bid_amount = float(request.POST["bid_amount"])
+        except ValueError:
+            return render(request, "auctions/listing.html", {
+                "listing": listing, 
+                "is_on_watchlist": is_on_watchlist,
+                "error": "Invalid bid amount."
+            })
 
-    return render(request, "auctions/listing.html", {
-        "listing": listing,
-        "current_price": current_price
-    })
+        # Lógica para determinar o preço atual (maior lance ou lance inicial)
+        highest_bid = listing.bids.order_by('-amount').first()
+        current_price = highest_bid.amount if highest_bid else listing.starting_bid
+
+        # Validação do lance
+        if bid_amount < listing.starting_bid:
+            error_message = f"Your bid must be at least ${listing.starting_bid}."
+        elif bid_amount <= current_price:
+            error_message = f"Your bid must be higher than the current price of ${current_price}."
+        else:
+            # Lance é válido, vamos criá-lo
+            new_bid = Bid(amount=bid_amount, bidder=request.user, listing=listing)
+            new_bid.save()
+            return HttpResponseRedirect(reverse("listing_page", args=[listing_id]))
+    
+        # Se houve um erro de validação, renderiza a página com a mensagem
+        return render(request, "auctions/listing.html", {
+            "listing": listing,
+            "is_on_watchlist": is_on_watchlist,
+            "current_price": current_price,
+            "error": error_message
+        })
+    
+    # Lógica para exibir a página (requisição GET)
+    else:
+        highest_bid = listing.bids.order_by('-amount').first()
+        current_price = highest_bid.amount if highest_bid else listing.starting_bid
+
+        return render(request, "auctions/listing.html", {
+            "listing": listing,
+            "is_on_watchlist": is_on_watchlist,
+            "current_price": current_price
+        })
+
+@login_required
+def add_watchlist(request, listing_id):
+    listing = get_object_or_404(Listing, pk=listing_id)
+    listing.watchlist.add(request.user)
+    return HttpResponseRedirect(reverse("listing_page", args=[listing_id]))
+
+@login_required
+def remove_watchlist(request, listing_id):
+    listing = get_object_or_404(Listing, pk=listing_id)
+    listing.watchlist.remove(request.user)
+    return HttpResponseRedirect(reverse("listing_page", args=[listing_id]))
