@@ -194,3 +194,14 @@ def close_auction(request, listing_id):
         listing.save()
 
     return HttpResponseRedirect(reverse("listing_page", args=[listing_id]))
+
+@login_required
+def watchlist(request):
+    # Usamos annotate para calcular o lance máximo para cada item
+    user_watchlist = request.user.watched_listings.annotate(
+        max_bid=Max('bids__amount')
+    ).all()
+    
+    return render(request, "auctions/watchlist.html", {
+        "listings": user_watchlist
+    })
