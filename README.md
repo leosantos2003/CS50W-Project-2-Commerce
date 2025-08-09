@@ -25,7 +25,7 @@ The site allows users to register an account to post auction listings, place bid
 
 ## Video Demo
 
-fewarkvjansdewafdsadfweads
+https://github.com/user-attachments/assets/1afcff7c-c970-48dc-9bb1-76328e6a5a61
 
 ## License
 
